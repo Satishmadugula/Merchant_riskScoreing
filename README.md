@@ -54,10 +54,13 @@ Unit tests for the scoring heuristics live in `tests/test_engine.py`.
 
 ## Example Usage
 
+<!-- <<<<<<< codex/build-modular-merchant-risk-scoring-app -->
 ### Postman Collection
 
 Import `postman/merchant_risk_scoring.postman_collection.json` into Postman to get preconfigured requests for both endpoints. Update the sample bodies as needed (for example, replace `image_base64` with a real document payload) and send the request against your running FastAPI server.
 
+=======
+<!-- >>>>>>> main -->
 ### OCR Extraction
 
 ```bash
