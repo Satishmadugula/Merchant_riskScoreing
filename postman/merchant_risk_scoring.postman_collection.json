@@ -1,0 +1,71 @@
+{
+  "info": {
+    "name": "Merchant Risk Scoring API",
+    "description": "Sample requests for the OCR extraction and risk scoring endpoints exposed by the Merchant Risk Scoring FastAPI service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "OCR Extraction",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image_base64\": \"<base64-encoded-image>\",\n  \"fields\": [\n    \"business_name\",\n    \"gst_number\",\n    \"address\"\n  ],\n  \"extra_instructions\": \"Prefer Indian government GST formatting.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/ocr/extract",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "ocr",
+            "extract"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Merchant Risk Score",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"merchant_id\": \"demo-123\",\n  \"business_name\": \"Acme Retail\",\n  \"registration_country\": \"IN\",\n  \"industry_category\": \"Retail\",\n  \"business_model\": \"Card-present retail\",\n  \"documents\": [\n    {\n      \"document_type\": \"GST\",\n      \"provided\": true,\n      \"verified\": true\n    },\n    {\n      \"document_type\": \"PAN\",\n      \"provided\": true,\n      \"verified\": true\n    }\n  ],\n  \"promoters\": [\n    {\n      \"full_name\": \"Priya Singh\",\n      \"credit_score\": 760,\n      \"years_of_experience\": 8\n    }\n  ],\n  \"digital_footprint\": {\n    \"website_quality\": \"high\",\n    \"domain_age_months\": 36,\n    \"social_presence\": \"moderate\",\n    \"review_volume\": 120,\n    \"average_review_rating\": 4.4,\n    \"contact_email_domain_matches\": true,\n    \"ip_geolocation_match\": true\n  },\n  \"financial_profile\": {\n    \"years_in_business\": 5,\n    \"average_monthly_balance\": 250000,\n    \"projected_monthly_volume\": 500000,\n    \"average_ticket_size\": 2500,\n    \"bank_account_age_months\": 48,\n    \"financial_documents_provided\": true\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/score",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "score"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
