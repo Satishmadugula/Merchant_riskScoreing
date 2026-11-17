@@ -1,0 +1,24 @@
+On-Premises Agent Knowledge Base: RBAC & Dataset Versioning Architecture
+1. Core Architectural Decisions
+A. User-Propagated Roles vs. Static Agent Roles
+Decision: Use User-Propagated Roles (On-Behalf-Of RBAC/ABAC) rather than binding static roles to individual agents.
+Why: Binding permissions to agents leads to role explosion as data sources grow (e.g., Finance_HR_Agent, Finance_Only_Agent). Treating the agent as a stateless runtime that inherits caller permissions keeps the codebase unified.
+Enforcement: Always enforce access control at the retrieval/database layer via mandatory metadata filters (WHERE data_source IN user.allowed_sources), never via system prompts alone (which are vulnerable to prompt injection).
+B. Storage Layer vs. Retrieval Layer
+Object Storage (MinIO / RustFS / Ceph): Acts as the System of Record for raw and processed artifacts, partitioned by source prefix (s3://kb-bucket/<source>/...).
+Search / Vector / Graph Index: Acts as the Low-Latency Retrieval Layer. Storage-level permissions must be mirrored as metadata tags (source, allowed_roles, commit_id, valid_from, valid_to) on every indexed chunk or node.
+2. Dataset-Level Versioning for Deterministic Evaluations
+Because knowledge base data updates continuously, offline evaluations require point-in-time reproducibility so agents see the exact same data state that existed when a production response was generated.
+Why Raw Object Versioning Isn't Enough
+MinIO / S3 Object Versioning tracks individual files (doc1.pdf -> v1, v2), making point-in-time reconstruction across thousands of files slow and complex.
+DVC + Object Storage provides Git-style dataset commits and content-addressable deduplication, ideal for scheduled/batch updates.
+lakeFS + Object Storage provides native Git-like operations (branch, commit, merge, tag, revert) and curated Datasets directly on top of S3-compatible storage without duplicating data—ideal for continuous or frequent ingestion.
+Two Patterns for Index-Level Point-in-Time Replay
+1. Temporal Validity Windows (Append-Only Index):
+Tag indexed chunks with valid_from and valid_to timestamps.
+Production: Queries WHERE valid_to IS NULL.
+Evaluation: Replays with logged eval_timestamp using WHERE valid_from <= eval_timestamp AND (valid_to > eval_timestamp OR valid_to IS NULL).
+2. Commit-Tagged Snapshots (lakeFS Integration):
+Tag indexed chunks with the immutable lakeFS commit_id generated on branch merge.
+Log (trace_id, user_roles, lakefs_commit_id, retrieved_chunk_ids) in production traces so evaluations can deterministically replay any historical commit.
+3. Storage Engine Comparison (On-Premises)
